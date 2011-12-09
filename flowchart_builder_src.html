@@ -11,9 +11,6 @@
       <script type="text/javascript" src="js/flowchart_shapes.js"></script>
       <script type="text/javascript" src="js/flowchart_canvas.js"></script>
       <script type="text/javascript">
-         // Set default font size, used by shapes.
-         FONT_SIZE = 30;
-         
          $(document).ready(function(){
             var jqCanvas = $("#theFlowchart"),
                 jqIFrame = $("#theFlowchartFrame", parent.document),
@@ -21,13 +18,13 @@
                 canvas = new FlowchartCanvas(jqCanvas, jqIFrame, gridSize);
             
             // Add four test shapes to the canvas.
-            canvas.addShape( [150,100], new FlowchartShape([100,100]) );
-            canvas.addShape( [350,100], new FlowchartShape([100,100]) );
-            canvas.addShape( [550,100], new FlowchartShape([100,100]) );
-            canvas.addShape( [750,100], new FlowchartShape([100,100]) );
+            canvas.AddShape( [150,100], new FlowchartShape([100,100]) );
+            canvas.AddShape( [350,100], new FlowchartShape([100,100]) );
+            canvas.AddShape( [550,100], new FlowchartShape([100,100]) );
+            canvas.AddShape( [750,100], new FlowchartShape([100,100]) );
             
             // The first draw() has to be called manually.
-            canvas.draw();
+            canvas.Draw();
             
             // Tests re-drawing of the canvas 100 times to catch some obvious canvas bugs
             // (e.g. forgetting beginPath() and closePath() will cause drawing to became
@@ -35,7 +32,7 @@
             for( i = 1; i <= 10; i++ ) {
                var start_date = new Date();
                for( o = 0; o < 10; o++ ) {
-                  canvas.draw();
+                  canvas.Draw();
                }
                var end_date = new Date();
                var elapsed_time = end_date.valueOf() - start_date.valueOf();

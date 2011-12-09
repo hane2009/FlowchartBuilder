@@ -1,44 +1,150 @@
+/*!
+ * FlowchartBuilder - Shape
+ *
+ * Copyright 2011, IJsbrand Slob
+ * All rights reserved
+ */
+
+/*!
+ * FlowchartShape
+ * Example shape to test functionality.
+ */
 var FlowchartShape = function( rect ) {
    "use strict";
    
-   this.draw = function( canvas ) {
+   // Public API
+   /*!
+    * Draw
+    * Draws this shape.
+    * Because this is an example shape I opted to draw just the boundaries
+    * of the shape while dragging, and the entire shape when in place.
+    */
+   this.Draw = function( context ) {
       if( this._deltaX !== 0 || this._deltaY !== 0 ) {
-         canvas.strokeRect( this.posX + this._deltaX - (0.5 * this.width),
-                            this.posY + this._deltaY - (0.5 * this.height), this.width, this.height );
+         context.strokeRect( this.posX + this._deltaX - (0.5 * this.width),
+                             this.posY + this._deltaY - (0.5 * this.height), this.width, this.height );
       }
       else {
-         canvas.strokeRect( this.posX - (0.5 * this.width), this.posY - (0.5 * this.height),
-                            this.width, this.height );
-         canvas.fillRect( this.posX - (0.25 * this.width), this.posY - (0.25 * this.height),
-                          0.5 * this.width, 0.5 * this.height );
+         context.strokeRect( this.posX - (0.5 * this.width), this.posY - (0.5 * this.height),
+                             this.width, this.height );
+         context.fillRect( this.posX - (0.25 * this.width), this.posY - (0.25 * this.height),
+                           0.5 * this.width, 0.5 * this.height );
       }
    };
    
-   this.inBoundaries = function( posX, posY ) {
+   /*!
+    * In Boundaries?
+    * Tests if a point is inside this shape's boundaries.
+    */
+   this.InBoundaries = function( posX, posY ) {
       return( posX >= this.posX - (0.5 * this.width) &&
               posX <= this.posX + (0.5 * this.width) &&
               posY >= this.posY - (0.5 * this.height) &&
               posY <= this.posY + (0.5 * this.height) );
    };
    
-   this.inMouseOverState = function() {
+   /*!
+    * In Mouseover State?
+    * Checks if this shape is currently in mouseover state.
+    * TODO: Should be refactored.
+    */
+   this.InMouseOverState = function() {
       return this._state === '_mouseover_';
    };
    
-   this.onMouseOver = function( canvas, event ) {
+   /*!
+    * On Mouseover
+    * Event handler for onmouseover events.
+    * In test shape, just switch the cursor to a pointer and toggle state.
+    */
+   this.OnMouseOver = function( canvas, event ) {
       canvas.css('cursor', 'pointer');
       this._state = '_mouseover_';
    };
    
-   this.onMouseOut = function( canvas, event ) {
+   /*!
+    * On Mouseout
+    * Event handler for onmouseout events.
+    * In test shape, just switch the cursor back to default and toggle state.
+    */
+   this.OnMouseOut = function( canvas, event ) {
       canvas.css('cursor', 'default');
       this._state = '_default_';
    };
    
-   this.onClick = function( canvas, event ) {
-      // Do nothing for now...
+   /*!
+    * On Click
+    * Event handler for click events.
+    * In test shape, don't do anyting.
+    */
+   this.OnClick = function( canvas, event ) {
    };
    
+   /*!
+    * On Mousedown
+    * Event handler for mousedown events.
+    * In test shape: Start dragging.
+    * TODO: Dragging should be a default function for all shapes.
+    */
+   this.OnMouseDown = function( canvas, event ) {
+      // Save begin position of drag
+      this._lastPosX = event.offsetX; this._lastPosY = event.offsetY;
+      
+      // Save currently attached event handlers.
+      this._savedMouseOutHandlers = this.detachHandlers( canvas, 'mouseout' );
+      this._savedMouseUpHandlers = this.detachHandlers( canvas, 'mouseup' );
+      this._savedMouseMoveHandlers = this.detachHandlers( canvas, 'mousemove' );
+      
+      // Bind new event handlers for dragging purposes.
+      canvas.on('mouseup', this.mouseUpFunc(canvas, false));
+      canvas.on('mouseout', this.mouseUpFunc(canvas, true));
+      canvas.on('mousemove', this.dragFunc());
+      
+      // Change the cursor to show that we're dragging.
+      canvas.css('cursor', 'move');
+   };
+   
+   /*!
+    * Set Parent
+    */
+   this.SetParent = function( p, position ) {
+      this._parent = p;
+      this.SetPosition( position );
+   };
+   
+   /*!
+    * Set Position
+    */
+   this.SetPosition = function( position ) {
+      this.posX = position[0];
+      this.posY = position[1];
+   };
+   
+   /*!
+    * Constructor
+    */
+   this.__init__ = function() {
+      this.width = rect[0];
+      this.height = rect[1];
+      
+      this._state = '_default_';
+      
+      // Dragging stuff
+      this._lastPosX = 0;
+      this._lastPosY = 0;
+      this._deltaX = 0;
+      this._deltaY = 0;
+      this._savedMouseMoveHandlers = [];
+      this._savedMouseUpHandlers = [];
+      this._savedMouseOutHandlers = [];
+   };
+   
+   // Private API
+   /*!
+    * Detach Handlers
+    * Detaches eventhandlers bound to event from canvas.
+    * Returns all detached event handlers as an array.
+    */
    this.detachHandlers = function( canvas, eventname ) {
       var detachedHandlers = [],
           events = canvas.data('events'),
@@ -57,38 +163,31 @@ var FlowchartShape = function( rect ) {
       return detachedHandlers;
    };
    
+   /*!
+    * Attach Handlers
+    * Bind a list of event handlers to eventname on canvas.
+    */
    this.attachHandlers = function( canvas, eventname, handlers ) {
       while( handlers.length > 0 ) {
          canvas.on(eventname, handlers.pop());
       }
    };
    
-   this.onMouseDown = function( canvas, event ) {
-      // Save begin position of drag
-      this._lastPosX = event.offsetX; this._lastPosY = event.offsetY;
-      
-      // Save event handlers
-      this._savedMouseOutHandlers = this.detachHandlers( canvas, 'mouseout' );
-      this._savedMouseUpHandlers = this.detachHandlers( canvas, 'mouseup' );
-      this._savedMouseMoveHandlers = this.detachHandlers( canvas, 'mousemove' );
-      
-      // Bind new event handlers for dragging
-      canvas.on('mouseup', this.mouseUpFunc(canvas, false));
-      canvas.on('mouseout', this.mouseUpFunc(canvas, true));
-      canvas.on('mousemove', this.dragFunc());
-      
-      canvas.css('cursor', 'move'); };
-   
+   /*!
+    * Mouse Up Functor
+    * Returns a function that handles mouse up events. Used for dragging.
+    * TODO: Dragging should be a default function for all shapes.
+    */
    this.mouseUpFunc = function(canvas, isMouseOut) {
       var self = this;
       return function(event) {
-         // Save location
+         // Save new location
          self.posX = self.posX + self._deltaX;
          self.posY = self.posY + self._deltaY;
          self._deltaX = 0;
          self._deltaY = 0;
          
-         // Restore event handlers
+         // Restore event handlers to canvas
          canvas.off('mousemove');
          canvas.off('mouseout');
          canvas.off('mouseup');
@@ -97,50 +196,38 @@ var FlowchartShape = function( rect ) {
          self.attachHandlers(canvas, 'mouseup', self._savedMouseUpHandlers );
          self.attachHandlers(canvas, 'mousemove', self._savedMouseMoveHandlers );
          
+         // Snap to grid and refresh
          self._parent.snapToGrid(self);
-         self._parent.draw();
+         self._parent.Draw();
          
+         // If the mouse moves outside the canvas, make sure to fire
+         // mouseout events on this shape, and on the originally bound mouseout
+         // event handlers of the canvas.
          if( isMouseOut ) {
-            self.onMouseOut(canvas, event);
+            self.OnMouseOut(canvas, event);
             canvas.mouseout();
          }
          else {
-            self.onMouseOver(canvas, event);
+            self.OnMouseOver(canvas, event);
          }
       };
    };
    
+   /*!
+    * Drag Functor
+    * Returns a function that handles drag events.
+    * TODO: Dragging should be a default function for all shapes.
+    */
    this.dragFunc = function() {
       var self = this;
       return function(event) {
          self._deltaX = event.offsetX - self._lastPosX;
          self._deltaY = event.offsetY - self._lastPosY;
          $("#debugger", parent.document).html('deltaX: '+self.deltaX+'<br>deltaY: '+self.deltaY);
-         self._parent.draw();
+         self._parent.Draw();
       };
    };
    
-   this.setParent = function( p, position ) {
-      this._parent = p;
-      this.setPosition( position );
-   };
-   
-   this.setPosition = function( position ) {
-      this.posX = position[0];
-      this.posY = position[1];
-   };
-   
-   this.width = rect[0];
-   this.height = rect[1];
-   
-   this._state = '_default_';
-   
-   // Dragging stuff
-   this._lastPosX = 0;
-   this._lastPosY = 0;
-   this._deltaX = 0;
-   this._deltaY = 0;
-   this._savedMouseMoveHandlers = [];
-   this._savedMouseUpHandlers = [];
-   this._savedMouseOutHandlers = [];
+   // Call the constructor
+   this.__init__();
 };

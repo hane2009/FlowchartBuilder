@@ -1,14 +1,104 @@
-var FONT_SIZE = 10;
+/*!
+ * FlowchartBuilder - Canvas
+ *
+ * Copyright 2011, IJsbrand Slob
+ * All rights reserved
+ */
+// Set default font size, used by shapes.
+var FONT_SIZE = 30;
+
+/*!
+ * FlowchartCanvas
+ * Encapsulates a HTML canvas, handles all tasks and events related
+ * to the canvas.
+ */
 var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    "use strict";
    
+   // Public API
+   /*!
+    * Add Shape
+    * Tries to add a shape at the specified position. Finds the
+    * closest available free grid position and places the shape
+    * at that location.
+    */
+   this.AddShape = function( pos, shape ) {
+      var gridPosition = this.findNearestGridPoint( pos );
+      shape.SetParent( this, gridPosition );
+      this._shapes.push(shape);
+   };
+   
+   /*!
+    * Draw
+    * Clears the canvas and re-draws the grid and contained
+    * shapes.
+    */
+   this.Draw = function() {
+      var context = this.get2dContext(),
+          x = 0,
+          y = 0,
+          i = 0;
+      // Clear canvas
+      context.clearRect( 0,0, this._width, this._height );
+      
+      // Draw grid locations...
+      for( i = 0; i < this._grid.length; i += 1 ) {
+         x = this._grid[i][0];
+         y = this._grid[i][1];
+         
+         // For now, mark grid locations with an X
+         context.beginPath();
+         context.moveTo(x-5,y-5);
+         context.lineTo(x+5,y+5);
+         context.moveTo(x+5,y-5);
+         context.lineTo(x-5,y+5);
+         context.closePath();
+         context.stroke();
+      }
+      
+      for( i = 0; i < this._shapes.length; i += 1 ) {
+         this._shapes[i].Draw( context );
+      }
+      
+      this._draws += 1;
+   };
+   
+   /*!
+    * Constructor
+    */
+   this.__init__ = function() {
+      jqCanvas.resizable({
+         minHeight: 50,
+         minWidth: 50,
+         grid: [50,50],
+         resize: this.resizeFunc()
+      });
+      jqCanvas.on('mousemove', this.mouseMoveFunc() );
+      jqCanvas.on('mousedown', this.mouseDownFunc() );
+      jqCanvas.on('click', this.clickFunc() );
+      
+      this._jqCanvas = jqCanvas;
+      this._jqIFrame = jqIFrame;
+      this._shapes = [];
+      this._draws = 0;
+      this.resize( jqCanvas.width(), jqCanvas.height() );
+      this.initializeGrid( gridSize );
+   };
+    
+   // Private API
+   /*!
+    * Get 2D Context
+    * Get the canvas' 2d context and initialize it
+    * to proper default values.
+    */
    this.get2dContext = function() {
-      // Get the canvas 2d context.
+      // Get the canvas' 2d context.
       var context = jqCanvas.get()[0].getContext('2d');
       if( !context ) {
          return;
       }
       
+      // Add proper defaults
       context.lineWidth = 2;
       
       context.textAlign = 'center';
@@ -18,6 +108,10 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       return context;
    };
    
+   /*!
+    * Initialize Grid
+    * TODO: Should be refactored.
+    */
    this.initializeGrid = function( gridSize ) {
       var x = 0,
           y = 0;
@@ -29,6 +123,10 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       }
    };
    
+   /*!
+    * Is Gridpoint Taken?
+    * TODO: Should be refactored
+    */
    this.isGridPointTaken = function( pos ) {
       var i = 0;
       for( i = 0; i < this._shapes.length; i += 1 ) {
@@ -40,6 +138,10 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       return false;
    };
    
+   /*!
+    * Find Nearest Gridpoint
+    * TODO: Should be refactored.
+    */
    this.findNearestGridPoint = function( pos ) {
       var nearestGridPoint = pos,
           minDist = 65535,
@@ -58,72 +160,58 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       return nearestGridPoint;
    };
    
+   /*!
+    * Snap To Grid
+    * Snaps a shape to the grid.
+    */
    this.snapToGrid = function( shape ) {
       var gridPosition = this.findNearestGridPoint( [shape.posX, shape.posY] );
-      shape.setPosition( gridPosition );
+      shape.SetPosition( gridPosition );
    };
    
-   this.addShape = function( pos, shape ) {
-      var gridPosition = this.findNearestGridPoint( pos );
-      shape.setParent( this, gridPosition );
-      this._shapes.push(shape);
-   };
-   
-   this.draw = function() {
-      var context = this.get2dContext(),
-          x = 0,
-          y = 0,
-          i = 0;
-      // Clear canvas
-      context.clearRect( 0,0, this._width, this._height );
-      
-      // Draw grid locations...
-      for( i = 0; i < this._grid.length; i += 1 ) {
-         x = this._grid[i][0];
-         y = this._grid[i][1];
-         
-         // X marks the spot
-         context.beginPath();
-         context.moveTo(x-5,y-5);
-         context.lineTo(x+5,y+5);
-         context.moveTo(x+5,y-5);
-         context.lineTo(x-5,y+5);
-         context.closePath();
-         context.stroke();
-      }
-      
-      for( i = 0; i < this._shapes.length; i += 1 ) {
-         this._shapes[i].draw( context );
-      }
-      
-      //$("#debugger", top.document).html( 'this._draws: '+ this._draws + "<br>"+
-      //                                   'this._width: '+ this._width + "<br>"+
-      //                                   'this._height: ' + this._height + "<br>");
-      this._draws += 1;
-   };
-   
+   /*!
+    * Resize
+    * Triggers when a resize event has taken place. Makes sure that
+    * the width and height attributes are updated.
+    */
    this.resize = function( width, height ) {
       this._width = width;
       this._height = height;
       
+      // Sets the 'width' and 'height' attributes of the canvas to prevent scaling.
+      // If you don't do this, the viewport and actual size of the canvas will vary,
+      // and it will look like you zoomed out / zoomed in on the canvas.
       this._jqCanvas.attr("width", this._width);
       this._jqCanvas.attr("height", this._height);
       
+      // Sets the 'width' and 'height' of the iframe to be a bit bigger than the canvas.
+      // If you don't do this, the mouse will move out of the iframe easily when resizing
+      // preventing new mouse-events to occur in this iframe, thus leaving the canvas in
+      // a 'busy with resizing' state.
       this._jqIFrame.attr("width", this._jqCanvas.outerWidth() + 50);
       this._jqIFrame.attr("height", this._jqCanvas.outerHeight() + 50); 
    };
    
+   /*!
+    * Resize Functor
+    * Returns a function that properly handles a resize event.
+    */
    this.resizeFunc = function() {
       var self = this;
       return function(event, ui) {
          if( self._width !== ui.originalElement.width() ||
              self._height !== ui.originalElement.height() ) {
             self.resize( ui.originalElement.width(), ui.originalElement.height() );
-            self.draw();
+            self.Draw();
          }
       };
    };
    
+   /*!
+    * Mouse Move Functor
+    * Returns a function that handles mousemove events on the canvas.
+    * The event handler creates mouseover / mouseout events for contained shapes.
+    */
    this.mouseMoveFunc = function() {
       var self = this,
           i = 0;
@@ -131,56 +219,52 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
          // Find any shapes on cursor position...
          $("#debugger", top.document).html( 'x: '+ event.offsetX + '<br>' + 'y: '+ event.offsetY );
          for( i = 0; i < self._shapes.length; i += 1 ) {
-            var inBoundaries = self._shapes[i].inBoundaries( event.offsetX, event.offsetY );
-            if( !self._shapes[i].inMouseOverState() && inBoundaries ) {
-               self._shapes[i].onMouseOver( self._jqCanvas, event );
+            var inBoundaries = self._shapes[i].InBoundaries( event.offsetX, event.offsetY );
+            if( !self._shapes[i].InMouseOverState() && inBoundaries ) {
+               self._shapes[i].OnMouseOver( self._jqCanvas, event );
             }
-            else if( self._shapes[i].inMouseOverState() && !inBoundaries ) {
-               self._shapes[i].onMouseOut( self._jqCanvas, event );
+            else if( self._shapes[i].InMouseOverState() && !inBoundaries ) {
+               self._shapes[i].OnMouseOut( self._jqCanvas, event );
             }
          }
       };
    };
    
+   /*!
+    * Click Functor
+    * Returns a function that handles click events on the canvas.
+    * The event handler will create click events for contained shapes.
+    */
    this.clickFunc = function() {
       var self = this,
           i = 0;
       return function(event) {
          for( i = 0; i < self._shapes.length; i += 1 ) {
-            if( self._shapes[i].inMouseOverState() ) {
-               self._shapes[i].onClick(self._jqCanvas, event);
+            if( self._shapes[i].InMouseOverState() ) {
+               self._shapes[i].OnClick(self._jqCanvas, event);
             }
          }
       };
    };
    
+   /*!
+    * Mouse Down Functor
+    * Returns a function that handles mousedown events on the canvas.
+    * The event handler will create mousedown events for contained shapes.
+    */
    this.mouseDownFunc = function() {
       var self = this,
           i = 0;
       return function(event) {
          for( i = 0; i < self._shapes.length; i += 1 ) {
-            if( self._shapes[i].inMouseOverState() ) {
-               self._shapes[i].onMouseDown(self._jqCanvas, event);
+            if( self._shapes[i].InMouseOverState() ) {
+               self._shapes[i].OnMouseDown(self._jqCanvas, event);
             }
          }
       };
    };
    
-   jqCanvas.resizable({
-      minHeight: 50,
-      minWidth: 50,
-      grid: [50,50],
-      resize: this.resizeFunc()
-   });
-   jqCanvas.on('mousemove', this.mouseMoveFunc() );
-   jqCanvas.on('mousedown', this.mouseDownFunc() );
-   jqCanvas.on('click', this.clickFunc() );
-   
-   this._jqCanvas = jqCanvas;
-   this._jqIFrame = jqIFrame;
-   this._shapes = [];
-   this._draws = 0;
-   this.resize( jqCanvas.width(), jqCanvas.height() );
-   this.initializeGrid( gridSize );
+   // Call the constructor
+   this.__init__();
 };
 
