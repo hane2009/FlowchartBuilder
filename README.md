@@ -9,10 +9,10 @@ The code needs some cleaning up so I can add several flowchart shapes.
 
 Next 5 items of TODO list
 -------------------------
- * Clean up source code a bit more
  * Fix the grid so I can determine if a shape is 'over' multiple grid points
  * Fix the grid so it displays more nicely, I'm thinking grid lines, with 'main' gridlines every 5 or so
- * Add several different flowchart shapes
+ * Add shapes for flowchart items to set of shapes
+ * Fix javascript inheritance to make dragging/dropping 'default behaviour' of all shapes.
  * Allow new shapes to be placed from some kind of 'toolbar'
 
 Testing
