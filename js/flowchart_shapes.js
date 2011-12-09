@@ -107,9 +107,8 @@ var FlowchartShape = function( rect ) {
    /*!
     * Set Parent
     */
-   this.SetParent = function( p, position ) {
+   this.SetParent = function( p ) {
       this._parent = p;
-      this.SetPosition( position );
    };
    
    /*!

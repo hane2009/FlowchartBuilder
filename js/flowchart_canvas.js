@@ -18,13 +18,13 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    // Public API
    /*!
     * Add Shape
-    * Tries to add a shape at the specified position. Finds the
-    * closest available free grid position and places the shape
-    * at that location.
+    * Tries to add a shape at the specified position. Then snaps it to
+    * the grid.
     */
    this.AddShape = function( pos, shape ) {
-      var gridPosition = this.findNearestGridPoint( pos );
-      shape.SetParent( this, gridPosition );
+      shape.SetParent( this );
+      shape.SetPosition( pos );
+      this.snapToGrid( shape );
       this._shapes.push(shape);
    };
    
@@ -35,32 +35,15 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
     */
    this.Draw = function() {
       var context = this.get2dContext(),
-          x = 0,
-          y = 0,
           i = 0;
       // Clear canvas
       context.clearRect( 0,0, this._width, this._height );
       
-      // Draw grid locations...
-      for( i = 0; i < this._grid.length; i += 1 ) {
-         x = this._grid[i][0];
-         y = this._grid[i][1];
-         
-         // For now, mark grid locations with an X
-         context.beginPath();
-         context.moveTo(x-5,y-5);
-         context.lineTo(x+5,y+5);
-         context.moveTo(x+5,y-5);
-         context.lineTo(x-5,y+5);
-         context.closePath();
-         context.stroke();
-      }
+      this.drawGrid( context );
       
-      for( i = 0; i < this._shapes.length; i += 1 ) {
-         this._shapes[i].Draw( context );
-      }
-      
-      this._draws += 1;
+      //for( i = 0; i < this._shapes.length; i += 1 ) {
+      //   this._shapes[i].Draw( context );
+      //}
    };
    
    /*!
@@ -70,7 +53,7 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       jqCanvas.resizable({
          minHeight: 50,
          minWidth: 50,
-         grid: [50,50],
+         grid: gridSize,
          resize: this.resizeFunc()
       });
       jqCanvas.on('mousemove', this.mouseMoveFunc() );
@@ -80,9 +63,8 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       this._jqCanvas = jqCanvas;
       this._jqIFrame = jqIFrame;
       this._shapes = [];
-      this._draws = 0;
+      this._gridSize = gridSize;
       this.resize( jqCanvas.width(), jqCanvas.height() );
-      this.initializeGrid( gridSize );
    };
     
    // Private API
@@ -109,64 +91,103 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    };
    
    /*!
-    * Initialize Grid
-    * TODO: Should be refactored.
+    * Draw Grid
     */
-   this.initializeGrid = function( gridSize ) {
+   this.drawGrid = function( context ) {
       var x = 0,
-          y = 0;
-      this._grid = [];
-      for( x = gridSize[0] * 0.5; x < this._width; x += gridSize[0] ) {
-         for( y = gridSize[1] * 0.5; y < this._height; y += gridSize[1] ) {
-            this._grid.push([x,y]);
+          y = 0,
+          pos = 0;
+      context.lineWidth = 1;
+      for( x = 1; x * this._gridSize[0] < this._width; x += 1 ) {
+         if( x % 5 == 0 ) {
+            context.strokeStyle = "#ccc";
          }
+         else {
+            context.strokeStyle = "#eee";
+         }
+         pos = x * this._gridSize[0] + 0.5;
+         context.beginPath();
+         context.moveTo( pos, 0 );
+         context.lineTo( pos, this._height );
+         context.closePath();
+         context.stroke();
+      }
+      
+      for( y = 1; y * this._gridSize[1] < this._height; y += 1 ) {
+         if( y % 5 == 0 ) {
+            context.strokeStyle = "#ccc";
+         }
+         else {
+            context.strokeStyle = "#eee";
+         }
+         pos = y * this._gridSize[1] + 0.5;
+         context.beginPath();
+         context.moveTo( 0, pos );
+         context.lineTo( this._width, pos );
+         context.closePath();
+         context.stroke();
       }
    };
    
-   /*!
-    * Is Gridpoint Taken?
-    * TODO: Should be refactored
-    */
-   this.isGridPointTaken = function( pos ) {
-      var i = 0;
-      for( i = 0; i < this._shapes.length; i += 1 ) {
-         if( this._shapes[i].posX === pos[0] &&
-             this._shapes[i].posY === pos[1] ) {
-            return true;
-         }
-      }
-      return false;
-   };
-   
-   /*!
-    * Find Nearest Gridpoint
-    * TODO: Should be refactored.
-    */
-   this.findNearestGridPoint = function( pos ) {
-      var nearestGridPoint = pos,
-          minDist = 65535,
-          dist = 0,
-          i = 0;
-      for( i = 0; i < this._grid.length; i += 1 ) {
-         dist = Math.abs(this._grid[i][0] - pos[0]) + Math.abs(this._grid[i][1] - pos[1]);
-         
-         if( minDist > dist ) {
-            if( !this.isGridPointTaken( this._grid[i] ) ) {
-               nearestGridPoint = this._grid[i];
-               minDist = dist;
-            }
-         }
-      }
-      return nearestGridPoint;
-   };
-   
+   ///*!
+   // * Initialize Grid
+   // * TODO: Should be refactored.
+   // */
+   //this.initializeGrid = function( gridSize ) {
+   //   var x = 0,
+   //       y = 0;
+   //   this._grid = [];
+   //   for( x = gridSize[0] * 0.5; x < this._width; x += gridSize[0] ) {
+   //      for( y = gridSize[1] * 0.5; y < this._height; y += gridSize[1] ) {
+   //         this._grid.push([x,y]);
+   //      }
+   //   }
+   //};
+   //
+   ///*!
+   // * Is Gridpoint Taken?
+   // * TODO: Should be refactored
+   // */
+   //this.isGridPointTaken = function( pos ) {
+   //   var i = 0;
+   //   for( i = 0; i < this._shapes.length; i += 1 ) {
+   //      if( this._shapes[i].posX === pos[0] &&
+   //          this._shapes[i].posY === pos[1] ) {
+   //         return true;
+   //      }
+   //   }
+   //   return false;
+   //};
+   //
+   ///*!
+   // * Find Nearest Gridpoint
+   // * TODO: Should be refactored.
+   // */
+   //this.findNearestGridPoint = function( pos ) {
+   //   var nearestGridPoint = pos,
+   //       minDist = 65535,
+   //       dist = 0,
+   //       i = 0;
+   //   for( i = 0; i < this._grid.length; i += 1 ) {
+   //      dist = Math.abs(this._grid[i][0] - pos[0]) + Math.abs(this._grid[i][1] - pos[1]);
+   //      
+   //      if( minDist > dist ) {
+   //         if( !this.isGridPointTaken( this._grid[i] ) ) {
+   //            nearestGridPoint = this._grid[i];
+   //            minDist = dist;
+   //         }
+   //      }
+   //   }
+   //   return nearestGridPoint;
+   //};
+   //
    /*!
     * Snap To Grid
     * Snaps a shape to the grid.
     */
    this.snapToGrid = function( shape ) {
-      var gridPosition = this.findNearestGridPoint( [shape.posX, shape.posY] );
-      shape.SetPosition( gridPosition );
+      //var gridPosition = this.findNearestGridPoint( [shape.posX, shape.posY] );
+      //shape.SetPosition( gridPosition );
    };
    
    /*!
