@@ -63,8 +63,8 @@ bigger.
 License
 -------
 Copyright 2011. [IJsbrand Slob] [huppie].
-Do not copy this code sending me a notification, for now, all rights reserved as I have not yet determined how 
-I would like to license it.
+Do not copy this code. Send me a notification if you would like to copy it. For now, all rights reserved as 
+I have not yet determined how I would like to license it.
 
 [huppie]:http://ijsbrandslob.com/
 [sochromebug]:http://stackoverflow.com/questions/2745028/chrome-sets-cursor-to-text-while-dragging-why
