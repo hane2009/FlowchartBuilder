@@ -11,20 +11,30 @@
       <script type="text/javascript" src="js/flowchart_shapes.js"></script>
       <script type="text/javascript" src="js/flowchart_canvas.js"></script>
       <script type="text/javascript">
+         // Set default font size, used by shapes.
          FONT_SIZE = 30;
+         
          $(document).ready(function(){
             var jqCanvas = $("#theFlowchart"),
                 jqIFrame = $("#theFlowchartFrame", parent.document),
-                canvas = new FlowchartCanvas(jqCanvas, jqIFrame, [200,200]);
+                gridSize = [200,200],
+                canvas = new FlowchartCanvas(jqCanvas, jqIFrame, gridSize);
+            
+            // Add four test shapes to the canvas.
             canvas.addShape( [150,100], new FlowchartShape([100,100]) );
             canvas.addShape( [350,100], new FlowchartShape([100,100]) );
             canvas.addShape( [550,100], new FlowchartShape([100,100]) );
             canvas.addShape( [750,100], new FlowchartShape([100,100]) );
+            
+            // The first draw() has to be called manually.
             canvas.draw();
             
+            // Tests re-drawing of the canvas 100 times to catch some obvious canvas bugs
+            // (e.g. forgetting beginPath() and closePath() will cause drawing to became
+            // slower over time.)
             for( i = 1; i <= 10; i++ ) {
                var start_date = new Date();
-               for( o = 0; o < 250; o++ ) {
+               for( o = 0; o < 10; o++ ) {
                   canvas.draw();
                }
                var end_date = new Date();
@@ -35,6 +45,8 @@
                );
             }
             
+            // Disable selection on this page because keeping it enabled causes Chrome to display
+            // a text-selection cursor when dragging.
             document.onselectstart = function() { return false; };
          });
       </script>
