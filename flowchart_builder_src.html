@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <title>Iframe Source</title>
+      <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet">
+      <style type="text/css">
+         html, body {
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+         }
+         #theFlowchart {
+            border: 1px solid #000;
+         }
+      </style>
+      <script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+      <script type="text/javascript" src="js/jquery-ui-1.8.16.min.js"></script>
+      <script type="text/javascript" src="js/flowchart_shapes.js"></script>
+      <script type="text/javascript" src="js/flowchart_canvas.js"></script>
+      <script type="text/javascript">
+         FONT_SIZE = 30;
+         $(document).ready(function(){
+            var jqCanvas = $("#theFlowchart"),
+                jqIFrame = $("#theFlowchartFrame", parent.document),
+                canvas = new FlowchartCanvas(jqCanvas, jqIFrame, [200,200]);
+            canvas.addShape( [150,100], new FlowchartShape([100,100]) );
+            canvas.addShape( [350,100], new FlowchartShape([100,100]) );
+            canvas.addShape( [550,100], new FlowchartShape([100,100]) );
+            canvas.addShape( [750,100], new FlowchartShape([100,100]) );
+            canvas.draw();
+            
+            for( i = 1; i <= 10; i++ ) {
+               var start_date = new Date();
+               for( o = 0; o < 250; o++ ) {
+                  canvas.draw();
+               }
+               var end_date = new Date();
+               var elapsed_time = end_date.valueOf() - start_date.valueOf();
+               $("#debugger", parent.document).html(
+                  $("#debugger", parent.document).html() +
+                  "Iteration " + i + ": " + (elapsed_time < 0 ? 'INVALID' : elapsed_time + "ms.") + "<br>"
+               );
+            }
+            
+            document.onselectstart = function() { return false; };
+         });
+      </script>
+   </head>
+   <body>
+      <canvas id="theFlowchart" width="800" height="600">The browser you are using does not support Canvas.</canvas>
+   </body>
+</html>
+
