@@ -28,15 +28,19 @@ To be honest, the very first tests did not include an iframe, but this causes a 
 Google Chrome. When dragging an element, Chrome would force the cursor to be a text-selection cursor.
 The problem is described here on [Stack Overflow] [sochromebug]. The solution to this is to return false
 on selection start. Because I still want to be able to select text on other elements of the page I tried this:
+
     $("canvas").mouseover( function() {
        document.onselectstart = function() { return false; };
     });
     $("canvas").mouseout( function() {
        document.onselectstart = function() { return true; };
     });
+
 This seems to work fine, the first time. But after one mouseout event, the cursor seems to be changing again.
 The best solution I could think of is to use an iframe, and inside this iframe set
+
     document.onselectstart = function() { return false; };
+
 so that when the cursor is inside the iframe, it does not change to a text-selection cursor. This seems to hold
 pretty well.
 
@@ -44,8 +48,9 @@ Why would you need javascript communication between the iframe and its parent do
 ---------------------------------------------------------------------------------------
 The flowchart builder should hold pretty well when not being able to communicate with its parent document,
 there are two things that wont work:
-1. Even if there is a debugger output window on the parent page, it wouldn't display anything.
-2. The resize functionality would be broken.
+
+ 1. Even if there is a debugger output window on the parent page, it wouldn't display anything.
+ 2. The resize functionality would be broken.
 
 For resizing I have chosen to use the jquery ui resizable plugin. This plugin wraps the canvas in a container
 and triggers a custom event when resizing. I use this event to update the width and height attributes of the 
