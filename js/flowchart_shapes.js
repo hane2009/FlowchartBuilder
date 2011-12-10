@@ -20,11 +20,26 @@ var FlowchartShape = function( rect ) {
     * of the shape while dragging, and the entire shape when in place.
     */
    this.Draw = function( context ) {
+      context.lineWidth = 2;
+      context.strokeStyle = "#000";
+      
       if( this._deltaX !== 0 || this._deltaY !== 0 ) {
          context.strokeRect( this.posX + this._deltaX - (0.5 * this.width),
                              this.posY + this._deltaY - (0.5 * this.height), this.width, this.height );
+         
+         context.strokeStyle = "#f00";
+         context.lineWidth = 1;
+         context.beginPath();
+         context.moveTo( this.posX + this._deltaX - 2.5, this.posY + this._deltaY - 2.5 );
+         context.lineTo( this.posX + this._deltaX + 2.5, this.posY + this._deltaY + 2.5 );
+         context.moveTo( this.posX + this._deltaX - 2.5, this.posY + this._deltaY + 2.5 );
+         context.lineTo( this.posX + this._deltaX + 2.5, this.posY + this._deltaY - 2.5 );
+         context.closePath();
+         context.stroke();
       }
       else {
+         context.clearRect( this.posX - (0.5 * this.width), this.posY - (0.5 * this.height),
+                            this.width, this.height );
          context.strokeRect( this.posX - (0.5 * this.width), this.posY - (0.5 * this.height),
                              this.width, this.height );
          context.fillRect( this.posX - (0.25 * this.width), this.posY - (0.25 * this.height),
@@ -222,7 +237,7 @@ var FlowchartShape = function( rect ) {
       return function(event) {
          self._deltaX = event.offsetX - self._lastPosX;
          self._deltaY = event.offsetY - self._lastPosY;
-         $("#debugger", parent.document).html('deltaX: '+self.deltaX+'<br>deltaY: '+self.deltaY);
+         $("#debugger", parent.document).html('deltaX: '+self._deltaX+'<br>deltaY: '+self._deltaY);
          self._parent.Draw();
       };
    };

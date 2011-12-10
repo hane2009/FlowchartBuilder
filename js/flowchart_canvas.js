@@ -41,9 +41,9 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       
       this.drawGrid( context );
       
-      //for( i = 0; i < this._shapes.length; i += 1 ) {
-      //   this._shapes[i].Draw( context );
-      //}
+      for( i = 0; i < this._shapes.length; i += 1 ) {
+         this._shapes[i].Draw( context );
+      }
    };
    
    /*!
@@ -158,36 +158,37 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    //   }
    //   return false;
    //};
-   //
-   ///*!
-   // * Find Nearest Gridpoint
-   // * TODO: Should be refactored.
-   // */
-   //this.findNearestGridPoint = function( pos ) {
-   //   var nearestGridPoint = pos,
-   //       minDist = 65535,
-   //       dist = 0,
-   //       i = 0;
-   //   for( i = 0; i < this._grid.length; i += 1 ) {
-   //      dist = Math.abs(this._grid[i][0] - pos[0]) + Math.abs(this._grid[i][1] - pos[1]);
-   //      
-   //      if( minDist > dist ) {
-   //         if( !this.isGridPointTaken( this._grid[i] ) ) {
-   //            nearestGridPoint = this._grid[i];
-   //            minDist = dist;
-   //         }
-   //      }
-   //   }
-   //   return nearestGridPoint;
-   //};
-   //
+   
+   /*!
+    * Find Nearest Gridpoint
+    * TODO: Should be refactored.
+    */
+   this.findNearestGridPoint = function( pos ) {
+      var nearestGridPoint = pos,
+          remainder = 0;
+      
+      var remainder = pos[0] % this._gridSize[0];
+      nearestGridPoint[0] = pos[0] - remainder;
+      if( Math.round( remainder / this._gridSize[0]  ) !== 0 ) {
+         nearestGridPoint[0] += this._gridSize[0];
+      }
+      
+      remainder = pos[1] % this._gridSize[1];
+      nearestGridPoint[1] = pos[1] - remainder;
+      if( Math.round( remainder  / this._gridSize[1] ) !== 0 ) {
+         nearestGridPoint[1] += this._gridSize[1];
+      }
+      
+      return nearestGridPoint;
+   };
+   
    /*!
     * Snap To Grid
     * Snaps a shape to the grid.
     */
    this.snapToGrid = function( shape ) {
-      //var gridPosition = this.findNearestGridPoint( [shape.posX, shape.posY] );
-      //shape.SetPosition( gridPosition );
+      var gridPosition = this.findNearestGridPoint( [shape.posX, shape.posY] );
+      shape.SetPosition( gridPosition );
    };
    
    /*!
