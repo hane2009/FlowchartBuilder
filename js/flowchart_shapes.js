@@ -38,8 +38,8 @@ var FlowchartShape = function( rect ) {
          context.stroke();
       }
       else {
-         context.clearRect( this.posX - (0.5 * this.width), this.posY - (0.5 * this.height),
-                            this.width, this.height );
+         //context.clearRect( this.posX - (0.5 * this.width), this.posY - (0.5 * this.height),
+         //                   this.width, this.height );
          context.strokeRect( this.posX - (0.5 * this.width), this.posY - (0.5 * this.height),
                              this.width, this.height );
          context.fillRect( this.posX - (0.25 * this.width), this.posY - (0.25 * this.height),
@@ -117,6 +117,26 @@ var FlowchartShape = function( rect ) {
       
       // Change the cursor to show that we're dragging.
       canvas.css('cursor', 'move');
+   };
+   
+   /*!
+    * Get Occupied Gridpoints
+    */
+   this.GetOccupiedGridpoints = function( gridSize ) {
+      var x = 0,
+          y = 0,
+          minPos = 0,
+          maxPos = 0,
+          gridPoints = [];
+      
+      minPos = this._parent.FindNearestGridPoint( [this.posX - this.width * 0.5, this.posY - this.height * 0.5 ] );
+      maxPos = this._parent.FindNearestGridPoint( [this.posX + this.width * 0.5, this.posY + this.height * 0.5 ] );
+      for( x = minPos[0]; x <= maxPos[0]; x += gridSize[0] ) {
+         for( y = minPos[1]; y <= maxPos[1]; y += gridSize[1] ) {
+            gridPoints.push( [x,y] );
+         }
+      }
+      return gridPoints;
    };
    
    /*!

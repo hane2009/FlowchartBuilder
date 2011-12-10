@@ -42,9 +42,33 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       
       this.drawGrid( context );
       
-      //for( i = 0; i < this._shapes.length; i += 1 ) {
-      //   this._shapes[i].Draw( context );
-      //}
+      for( i = 0; i < this._shapes.length; i += 1 ) {
+         this._shapes[i].Draw( context );
+      }
+   };
+   
+   /*!
+    * Find Nearest Gridpoint
+    * Find the nearest gridpoint to a position, not considering
+    * whether the grid location is occupied.
+    */
+   this.FindNearestGridPoint = function( pos ) {
+      var nearestGridPoint = pos,
+          remainder = 0;
+      
+      var remainder = pos[0] % this._gridSize[0];
+      nearestGridPoint[0] = pos[0] - remainder;
+      if( Math.round( remainder / this._gridSize[0]  ) !== 0 ) {
+         nearestGridPoint[0] += this._gridSize[0];
+      }
+      
+      remainder = pos[1] % this._gridSize[1];
+      nearestGridPoint[1] = pos[1] - remainder;
+      if( Math.round( remainder  / this._gridSize[1] ) !== 0 ) {
+         nearestGridPoint[1] += this._gridSize[1];
+      }
+      
+      return nearestGridPoint;
    };
    
    /*!
@@ -183,34 +207,11 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    //   return false;
    //};
    
-   /*!
-    * Find Nearest Gridpoint
-    * TODO: Add comments...
-    */
-   this.findNearestGridPoint = function( pos ) {
-      var nearestGridPoint = pos,
-          remainder = 0;
-      
-      var remainder = pos[0] % this._gridSize[0];
-      nearestGridPoint[0] = pos[0] - remainder;
-      if( Math.round( remainder / this._gridSize[0]  ) !== 0 ) {
-         nearestGridPoint[0] += this._gridSize[0];
-      }
-      
-      remainder = pos[1] % this._gridSize[1];
-      nearestGridPoint[1] = pos[1] - remainder;
-      if( Math.round( remainder  / this._gridSize[1] ) !== 0 ) {
-         nearestGridPoint[1] += this._gridSize[1];
-      }
-      
-      return nearestGridPoint;
-   };
-   
-   /*!
+  /*!
     * Update Grid
     */
    this.updateGrid = function( shape ) {
-      this._grid[shape.ID] = [[shape.posX, shape.posY]];
+      this._grid[shape.ID] = shape.GetOccupiedGridpoints( this._gridSize );
    };
    
    /*!
@@ -218,7 +219,7 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
     * Snaps a shape to the grid.
     */
    this.snapToGrid = function( shape ) {
-      var gridPosition = this.findNearestGridPoint( [shape.posX, shape.posY] );
+      var gridPosition = this.FindNearestGridPoint( [shape.posX, shape.posY] );
       shape.SetPosition( gridPosition );
       this.updateGrid( shape );
    };
