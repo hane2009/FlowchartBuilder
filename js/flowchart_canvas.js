@@ -24,8 +24,9 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    this.AddShape = function( pos, shape ) {
       shape.SetParent( this );
       shape.SetPosition( pos );
-      this.snapToGrid( shape );
+      shape.ID = this._shapes.length;
       this._shapes.push(shape);
+      this.snapToGrid( shape );
    };
    
    /*!
@@ -41,9 +42,9 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       
       this.drawGrid( context );
       
-      for( i = 0; i < this._shapes.length; i += 1 ) {
-         this._shapes[i].Draw( context );
-      }
+      //for( i = 0; i < this._shapes.length; i += 1 ) {
+      //   this._shapes[i].Draw( context );
+      //}
    };
    
    /*!
@@ -64,6 +65,7 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       this._jqIFrame = jqIFrame;
       this._shapes = [];
       this._gridSize = gridSize;
+      this._grid = {};
       this.resize( jqCanvas.width(), jqCanvas.height() );
    };
     
@@ -94,9 +96,13 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
     * Draw Grid
     */
    this.drawGrid = function( context ) {
-      var x = 0,
+      var i = 0,
+          x = 0,
           y = 0,
-          pos = 0;
+          pos = 0,
+          shapeID = -1,
+          occupiedGridpoints = [],
+          occupiedGridpoint = [];
       context.lineWidth = 1;
       for( x = 1; x * this._gridSize[0] < this._width; x += 1 ) {
          if( x % 5 == 0 ) {
@@ -127,7 +133,25 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
          context.closePath();
          context.stroke();
       }
-   };
+      
+      // Show grid points that are currently occupied.
+      for( shapeID = 0; shapeID < this._shapes.length; shapeID += 1 ) {
+         // Each shape has its own set of grid points.
+         occupiedGridpoints = this._grid[shapeID];
+         for( i = 0; i < occupiedGridpoints.length; i += 1 ) {
+            occupiedGridpoint = occupiedGridpoints[i];
+            
+            context.strokeStyle = "#f00";
+            context.beginPath();
+            context.moveTo( occupiedGridpoint[0] - 2.5, occupiedGridpoint[1] - 2.5 );
+            context.lineTo( occupiedGridpoint[0] + 2.5, occupiedGridpoint[1] + 2.5 );
+            context.moveTo( occupiedGridpoint[0] - 2.5, occupiedGridpoint[1] + 2.5 );
+            context.lineTo( occupiedGridpoint[0] + 2.5, occupiedGridpoint[1] - 2.5 );
+            context.closePath();
+            context.stroke();
+         }
+      }
+  };
    
    ///*!
    // * Initialize Grid
@@ -161,7 +185,7 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    
    /*!
     * Find Nearest Gridpoint
-    * TODO: Should be refactored.
+    * TODO: Add comments...
     */
    this.findNearestGridPoint = function( pos ) {
       var nearestGridPoint = pos,
@@ -183,12 +207,20 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    };
    
    /*!
+    * Update Grid
+    */
+   this.updateGrid = function( shape ) {
+      this._grid[shape.ID] = [[shape.posX, shape.posY]];
+   };
+   
+   /*!
     * Snap To Grid
     * Snaps a shape to the grid.
     */
    this.snapToGrid = function( shape ) {
       var gridPosition = this.findNearestGridPoint( [shape.posX, shape.posY] );
       shape.SetPosition( gridPosition );
+      this.updateGrid( shape );
    };
    
    /*!

@@ -138,6 +138,8 @@ var FlowchartShape = function( rect ) {
     * Constructor
     */
    this.__init__ = function() {
+      this.ID = -1;
+      
       this.width = rect[0];
       this.height = rect[1];
       
