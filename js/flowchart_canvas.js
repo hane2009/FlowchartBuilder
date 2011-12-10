@@ -89,7 +89,7 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       this._jqIFrame = jqIFrame;
       this._shapes = [];
       this._gridSize = gridSize;
-      this._grid = {};
+      this._grid = [];
       this.resize( jqCanvas.width(), jqCanvas.height() );
    };
     
@@ -177,37 +177,42 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       }
   };
    
-   ///*!
-   // * Initialize Grid
-   // * TODO: Should be refactored.
-   // */
-   //this.initializeGrid = function( gridSize ) {
-   //   var x = 0,
-   //       y = 0;
-   //   this._grid = [];
-   //   for( x = gridSize[0] * 0.5; x < this._width; x += gridSize[0] ) {
-   //      for( y = gridSize[1] * 0.5; y < this._height; y += gridSize[1] ) {
-   //         this._grid.push([x,y]);
-   //      }
-   //   }
-   //};
-   //
-   ///*!
-   // * Is Gridpoint Taken?
-   // * TODO: Should be refactored
-   // */
-   //this.isGridPointTaken = function( pos ) {
-   //   var i = 0;
-   //   for( i = 0; i < this._shapes.length; i += 1 ) {
-   //      if( this._shapes[i].posX === pos[0] &&
-   //          this._shapes[i].posY === pos[1] ) {
-   //         return true;
-   //      }
-   //   }
-   //   return false;
-   //};
+   /*!
+    * Is Valid Gridpoint
+    */
+   this.isValidGridpoint = function( point, deltaGrid ) {
+      var i = 0,
+          o = 0,
+          gridpoint = [],
+          // Flatten the grid to a single dimensional array:
+          occupiedGridpoints = [].concat.apply([],this._grid);
+      
+      for( i = 0; i < deltaGrid.length; i += 1 ) {
+         gridpoint = [point[0] + deltaGrid[i][0], point[1] + deltaGrid[i][1]];
+         if( occupiedGridpoints.containsPoint( gridpoint ) ) {
+            return false;
+         }
+      }
+      
+      return true;
+   };
    
-  /*!
+   /*!
+    * Find Free Gridpoint
+    * Finds the nearest gridpoint that is not occupied.
+    */
+   this.findFreeGridpoint = function( pos, deltaGrid ) {
+      var gridpoint = this.FindNearestGridPoint( pos );
+      if( ! this.isValidGridpoint( gridpoint, deltaGrid ) ) {
+         alert('invalid grid point, now what?');
+         //TODO: Find 'available grid points near edge of shapes'
+         //TODO: Find 'closest available grid point'
+      }
+      
+      return gridpoint;
+   };
+   
+   /*!
     * Update Grid
     */
    this.updateGrid = function( shape ) {
@@ -215,11 +220,28 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    };
    
    /*!
+    * Remove From Grid
+    */
+   this.removeFromGrid = function( shape ) {
+      this._grid[shape.ID] = [];
+   };
+   
+   /*!
     * Snap To Grid
     * Snaps a shape to the grid.
     */
    this.snapToGrid = function( shape ) {
-      var gridPosition = this.FindNearestGridPoint( [shape.posX, shape.posY] );
+      var currentPosition = [shape.posX, shape.posY],
+          deltaGrid = [],
+          gridPosition = 0;
+      
+      // Get delta grid from shape...
+      shape.SetPosition( [0,0] );
+      deltaGrid = shape.GetOccupiedGridpoints( this._gridSize );
+      shape.SetPosition( currentPosition );
+      
+      gridPosition = this.findFreeGridpoint( [shape.posX, shape.posY], deltaGrid );
+      
       shape.SetPosition( gridPosition );
       this.updateGrid( shape );
    };
@@ -322,4 +344,28 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    // Call the constructor
    this.__init__();
 };
+
+if( !Array.prototype.containsPoint ) {
+   /*!
+    * Array: Contains Point
+    * Naieve implementation to check the grid array if it contains
+    * a certain point.
+    */
+   Array.prototype.containsPoint = function(point) {
+      "use strict";
+      
+      var i;
+      
+      if( this === void 0 || this === null )
+         throw new TypeError();
+      
+      for( i = 0; i < this.length; i += 1 ) {
+         if( this[i][0] === point[0] &&
+             this[i][1] === point[1] ) {
+            return true;
+         }
+      }
+      return false;
+   };
+}
 

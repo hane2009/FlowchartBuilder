@@ -117,6 +117,9 @@ var FlowchartShape = function( rect ) {
       
       // Change the cursor to show that we're dragging.
       canvas.css('cursor', 'move');
+      
+      // Free occupied grid points...
+      this._parent.removeFromGrid( this );
    };
    
    /*!
