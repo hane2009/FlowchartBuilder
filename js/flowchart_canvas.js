@@ -36,14 +36,19 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
     */
    this.Draw = function() {
       var context = this.get2dContext(),
-          i = 0;
+          i = 0,
+          showGridpoints = true;
       // Clear canvas
       context.clearRect( 0,0, this._width, this._height );
       
-      this.drawGrid( context, false );
+      this.drawGrid( context );
       
       for( i = 0; i < this._shapes.length; i += 1 ) {
          this._shapes[i].Draw( context );
+      }
+      
+      if( showGridpoints === true ) {
+         this.showGridPoints( context );
       }
    };
    
@@ -119,16 +124,11 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    /*!
     * Draw Grid
     */
-   this.drawGrid = function( context, displayGrid ) {
+   this.drawGrid = function( context ) {
       var i = 0,
           x = 0,
           y = 0,
-          pos = 0,
-          shapeID = -1,
-          occupiedGridpoints = [],
-          occupiedGridpoint = [],
-          availableGridpoints = [],
-          freePoint = [];
+          pos = 0;
       context.lineWidth = 1;
       for( x = 1; x * this._gridSize[0] < this._width; x += 1 ) {
          if( x % 5 == 0 ) {
@@ -159,36 +159,44 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
          context.closePath();
          context.stroke();
       }
-      if( displayGrid === true ) {
-         // Show grid points that are currently occupied.
-         for( shapeID = 0; shapeID < this._shapes.length; shapeID += 1 ) {
-            // Each shape has its own set of grid points.
-            occupiedGridpoints = this._grid[shapeID];
-            for( i = 0; i < occupiedGridpoints.length; i += 1 ) {
-               occupiedGridpoint = occupiedGridpoints[i];
-               
-               context.strokeStyle = "#f00";
-               context.beginPath();
-               context.moveTo( occupiedGridpoint[0] - 2.5, occupiedGridpoint[1] - 2.5 );
-               context.lineTo( occupiedGridpoint[0] + 2.5, occupiedGridpoint[1] + 2.5 );
-               context.moveTo( occupiedGridpoint[0] - 2.5, occupiedGridpoint[1] + 2.5 );
-               context.lineTo( occupiedGridpoint[0] + 2.5, occupiedGridpoint[1] - 2.5 );
-               context.closePath();
-               context.stroke();
-            }
-         }
-         
-         // Show grid points that are currently 'free'.
-         var availableGridpoints = this.getAvailableGridpoints();
-         for( i = 0; i < availableGridpoints.length; i += 1 ) {
-            freePoint = availableGridpoints[i];
+   };
+   
+   this.showGridPoints = function( context ) {
+      var i = 0,
+          shapeID = -1,
+          occupiedGridpoints = [],
+          occupiedGridpoint = [],
+          availableGridpoints = [],
+          freePoint = [];
+      
+      // Show grid points that are currently occupied.
+      for( shapeID = 0; shapeID < this._shapes.length; shapeID += 1 ) {
+         // Each shape has its own set of grid points.
+         occupiedGridpoints = this._grid[shapeID];
+         for( i = 0; i < occupiedGridpoints.length; i += 1 ) {
+            occupiedGridpoint = occupiedGridpoints[i];
             
-            context.fillStyle = "#0f0";
-            context.strokeStyle = "#0f0";
-            context.fillRect( freePoint[0] - 3, freePoint[1] - 3, 6, 6 );
+            context.strokeStyle = "#f00";
+            context.beginPath();
+            context.moveTo( occupiedGridpoint[0] - 2.5, occupiedGridpoint[1] - 2.5 );
+            context.lineTo( occupiedGridpoint[0] + 2.5, occupiedGridpoint[1] + 2.5 );
+            context.moveTo( occupiedGridpoint[0] - 2.5, occupiedGridpoint[1] + 2.5 );
+            context.lineTo( occupiedGridpoint[0] + 2.5, occupiedGridpoint[1] - 2.5 );
+            context.closePath();
+            context.stroke();
          }
       }
-  };
+      
+      // Show grid points that are currently 'free'.
+      var availableGridpoints = this.getAvailableGridpoints();
+      for( i = 0; i < availableGridpoints.length; i += 1 ) {
+         freePoint = availableGridpoints[i];
+         
+         context.fillStyle = "#0f0";
+         context.strokeStyle = "#0f0";
+         context.fillRect( freePoint[0] - 3, freePoint[1] - 3, 6, 6 );
+      }
+   };
    
    /*!
     * Is Valid Gridpoint
