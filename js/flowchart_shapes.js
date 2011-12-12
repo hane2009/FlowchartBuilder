@@ -181,6 +181,34 @@ var FlowchartShape = function( rect ) {
    
    // Private API
    /*!
+    * Split text
+    * Split the text into lines.
+    */
+   this.splitText = function( text ) {
+      var lines = new Array();
+      do {
+         lines.push( text.substr( 0, 12 ).replace(/^\s+|\s+$/g, '') );
+         text = text.substr( 12 );
+      } while( text.length > 0 );
+      
+      
+      return lines;
+   };
+   
+   /*!
+    * Draw Text
+    * Draws an array of lines.
+    */
+   this.drawText = function( lines, context, midPosX, midPosY ) {
+      var offsetY = -(0.5 * FONT_SIZE) * (lines.length - 1),
+          i = 0;
+      for( i = 0; i < lines.length; i += 1 ) {
+         context.fillText( lines[i], midPosX, midPosY + offsetY );
+         offsetY += FONT_SIZE;
+      }
+   };
+   
+   /*!
     * Detach Handlers
     * Detaches eventhandlers bound to event from canvas.
     * Returns all detached event handlers as an array.
@@ -266,6 +294,44 @@ var FlowchartShape = function( rect ) {
          $("#debugger", parent.document).html('deltaX: '+self._deltaX+'<br>deltaY: '+self._deltaY);
          self._parent.Draw();
       };
+   };
+   
+   // Call the constructor
+   this.__init__();
+};
+
+var Action = function( name ) {
+   "use strict";
+   
+   // Initialize Action as a subclass of FlowchartShape.
+   FlowchartShape.call(this,[8*FONT_SIZE,FONT_SIZE]);
+   
+   // Public API
+   /*!
+    * Draw
+    * Draws this shape.
+    * Because this is an example shape I opted to draw just the boundaries
+    * of the shape while dragging, and the entire shape when in place.
+    */
+   this.Draw = function( context ) {
+      var width = 8 * FONT_SIZE,
+          height = FONT_SIZE,
+          lines = [];
+      
+      context.lineWidth = 2;
+      context.fillStyle = "#000";
+      context.strokeStyle = "#000";
+      
+      lines = this.splitText( this._name );
+      
+      height = (lines.length + 1) * FONT_SIZE;
+      context.clearRect( this.posX + this._deltaX - width * 0.5, this.posY + this._deltaY - height * 0.5, width, height );
+      this.drawText( lines, context, this.posX + this._deltaX, this.posY + this._deltaY );
+      context.strokeRect( this.posX + this._deltaX  - width * 0.5, this.posY + this._deltaY - height * 0.5, width, height );
+   };
+   
+   this.__init__ = function() {
+      this._name = name;
    };
    
    // Call the constructor
