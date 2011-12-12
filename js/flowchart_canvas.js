@@ -5,7 +5,7 @@
  * All rights reserved
  */
 // Set default font size, used by shapes.
-var FONT_SIZE = 30;
+var FONT_SIZE = 24;
 
 /*!
  * FlowchartCanvas
