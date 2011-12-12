@@ -202,6 +202,7 @@ var FlowchartShape = function( rect ) {
    this.drawText = function( lines, context, midPosX, midPosY ) {
       var offsetY = -(0.5 * FONT_SIZE) * (lines.length - 1),
           i = 0;
+      context.fillStyle = "#000";
       for( i = 0; i < lines.length; i += 1 ) {
          context.fillText( lines[i], midPosX, midPosY + offsetY );
          offsetY += FONT_SIZE;
@@ -309,9 +310,7 @@ var Action = function( name ) {
    // Public API
    /*!
     * Draw
-    * Draws this shape.
-    * Because this is an example shape I opted to draw just the boundaries
-    * of the shape while dragging, and the entire shape when in place.
+    * TODO: Add comments
     */
    this.Draw = function( context ) {
       var width = 8 * FONT_SIZE,
@@ -330,6 +329,55 @@ var Action = function( name ) {
       context.strokeRect( this.posX + this._deltaX  - width * 0.5, this.posY + this._deltaY - height * 0.5, width, height );
    };
    
+   /*!
+    * Constructor
+    */
+   this.__init__ = function() {
+      this._name = name;
+   };
+   
+   // Call the constructor
+   this.__init__();
+};
+
+var Choice = function( name ) {
+   "use strict";
+   
+   // Initialize Action as a subclass of FlowchartShape.
+   FlowchartShape.call(this,[8*FONT_SIZE,FONT_SIZE]);
+   
+   // Public API
+   /*!
+    * Draw
+    * TODO: Add comments
+    */
+   this.Draw = function( context ) {
+      var width = 8 * FONT_SIZE,
+          height = FONT_SIZE,
+          lines = [];
+      
+      context.lineWidth = 2;
+      context.fillStyle = "#fff";
+      context.strokeStyle = "#000";
+      
+      lines = this.splitText( this._name );
+      
+      height = (lines.length + 1) * FONT_SIZE;
+      context.beginPath();
+      context.moveTo( this.posX + this._deltaX, this.posY + this._deltaY - height * 0.5 );
+      context.lineTo( this.posX + this._deltaX + width * 0.5, this.posY + this._deltaY );
+      context.lineTo( this.posX + this._deltaX, this.posY + this._deltaY + height * 0.5 );
+      context.lineTo( this.posX + this._deltaX - width * 0.5, this.posY + this._deltaY );
+      context.lineTo( this.posX + this._deltaX, this.posY + this._deltaY - height * 0.5 );
+      context.fill();
+      context.stroke();
+      context.closePath();
+      this.drawText( lines, context, this.posX + this._deltaX, this.posY + this._deltaY );
+   };
+   
+   /*!
+    * Constructor
+    */
    this.__init__ = function() {
       this._name = name;
    };
