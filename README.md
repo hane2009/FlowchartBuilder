@@ -7,10 +7,8 @@ State of source code
 It is currently in a state where you can drag & drop shapes on a grid, not much but something.
 The code needs some cleaning up so I can add several flowchart shapes.
 
-Next 5 items of TODO list
+Next items of TODO list
 -------------------------
- * Find closest available grid point to a certain point
- * Fix snap to grid
  * Add shapes for flowchart items to set of shapes
  * Fix javascript inheritance to make dragging/dropping 'default behaviour' of all shapes.
  * Allow new shapes to be placed from some kind of 'toolbar'
