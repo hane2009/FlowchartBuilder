@@ -37,7 +37,7 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    this.Draw = function() {
       var context = this.get2dContext(),
           i = 0,
-          showGridpoints = true;
+          showGridpoints = false;
       // Clear canvas
       context.clearRect( 0,0, this._width, this._height );
       
