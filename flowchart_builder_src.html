@@ -14,14 +14,14 @@
          $(document).ready(function(){
             var jqCanvas = $("#theFlowchart"),
                 jqIFrame = $("#theFlowchartFrame", parent.document),
-                gridSize = [25,25],
+                gridSize = [10,10],
                 canvas = new FlowchartCanvas(jqCanvas, jqIFrame, gridSize);
             
             // Add four test shapes to the canvas.
-            canvas.AddShape( [152,101], new FlowchartShape([110,110]) );
-            canvas.AddShape( [354,103], new FlowchartShape([110,110]) );
-            canvas.AddShape( [556,106], new FlowchartShape([110,110]) );
-            canvas.AddShape( [758,109], new FlowchartShape([110,110]) );
+            canvas.AddShape( [152,101], new FlowchartShape([120,120]) );
+            canvas.AddShape( [354,103], new FlowchartShape([120,120]) );
+            canvas.AddShape( [556,106], new FlowchartShape([120,120]) );
+            canvas.AddShape( [758,109], new FlowchartShape([120,120]) );
             
             // The first draw() has to be called manually.
             canvas.Draw();
@@ -38,7 +38,7 @@
                var elapsed_time = end_date.valueOf() - start_date.valueOf();
                $("#debugger", parent.document).html(
                   $("#debugger", parent.document).html() +
-                  "Iteration " + i + ": " + (elapsed_time < 0 ? 'INVALID' : elapsed_time + "ms.") + "<br>"
+                  "Iteration " + i + ": " + elapsed_time + "ms. (" + Math.round( 1000 / (elapsed_time / 10) ) + "fps)<br>"
                );
             }
             
@@ -49,7 +49,7 @@
       </script>
    </head>
    <body>
-      <canvas id="theFlowchart" width="800" height="600">The browser you are using does not support Canvas.</canvas>
+      <canvas id="theFlowchart" width="950" height="1900">The browser you are using does not support Canvas.</canvas>
    </body>
 </html>
 
