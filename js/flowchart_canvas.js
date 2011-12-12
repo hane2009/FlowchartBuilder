@@ -40,7 +40,7 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
       // Clear canvas
       context.clearRect( 0,0, this._width, this._height );
       
-      this.drawGrid( context );
+      this.drawGrid( context, false );
       
       for( i = 0; i < this._shapes.length; i += 1 ) {
          this._shapes[i].Draw( context );
@@ -119,14 +119,16 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    /*!
     * Draw Grid
     */
-   this.drawGrid = function( context ) {
+   this.drawGrid = function( context, displayGrid ) {
       var i = 0,
           x = 0,
           y = 0,
           pos = 0,
           shapeID = -1,
           occupiedGridpoints = [],
-          occupiedGridpoint = [];
+          occupiedGridpoint = [],
+          availableGridpoints = [],
+          freePoint = [];
       context.lineWidth = 1;
       for( x = 1; x * this._gridSize[0] < this._width; x += 1 ) {
          if( x % 5 == 0 ) {
@@ -157,22 +159,33 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
          context.closePath();
          context.stroke();
       }
-      
-      // Show grid points that are currently occupied.
-      for( shapeID = 0; shapeID < this._shapes.length; shapeID += 1 ) {
-         // Each shape has its own set of grid points.
-         occupiedGridpoints = this._grid[shapeID];
-         for( i = 0; i < occupiedGridpoints.length; i += 1 ) {
-            occupiedGridpoint = occupiedGridpoints[i];
+      if( displayGrid === true ) {
+         // Show grid points that are currently occupied.
+         for( shapeID = 0; shapeID < this._shapes.length; shapeID += 1 ) {
+            // Each shape has its own set of grid points.
+            occupiedGridpoints = this._grid[shapeID];
+            for( i = 0; i < occupiedGridpoints.length; i += 1 ) {
+               occupiedGridpoint = occupiedGridpoints[i];
+               
+               context.strokeStyle = "#f00";
+               context.beginPath();
+               context.moveTo( occupiedGridpoint[0] - 2.5, occupiedGridpoint[1] - 2.5 );
+               context.lineTo( occupiedGridpoint[0] + 2.5, occupiedGridpoint[1] + 2.5 );
+               context.moveTo( occupiedGridpoint[0] - 2.5, occupiedGridpoint[1] + 2.5 );
+               context.lineTo( occupiedGridpoint[0] + 2.5, occupiedGridpoint[1] - 2.5 );
+               context.closePath();
+               context.stroke();
+            }
+         }
+         
+         // Show grid points that are currently 'free'.
+         var availableGridpoints = this.getAvailableGridpoints();
+         for( i = 0; i < availableGridpoints.length; i += 1 ) {
+            freePoint = availableGridpoints[i];
             
-            context.strokeStyle = "#f00";
-            context.beginPath();
-            context.moveTo( occupiedGridpoint[0] - 2.5, occupiedGridpoint[1] - 2.5 );
-            context.lineTo( occupiedGridpoint[0] + 2.5, occupiedGridpoint[1] + 2.5 );
-            context.moveTo( occupiedGridpoint[0] - 2.5, occupiedGridpoint[1] + 2.5 );
-            context.lineTo( occupiedGridpoint[0] + 2.5, occupiedGridpoint[1] - 2.5 );
-            context.closePath();
-            context.stroke();
+            context.fillStyle = "#0f0";
+            context.strokeStyle = "#0f0";
+            context.fillRect( freePoint[0] - 3, freePoint[1] - 3, 6, 6 );
          }
       }
   };
@@ -198,15 +211,65 @@ var FlowchartCanvas = function(jqCanvas, jqIFrame, gridSize) {
    };
    
    /*!
+    * Get Available Gridpoints
+    */
+   this.getAvailableGridpoints = function() {
+      var x = 0,
+          y = 0,
+          gridpoint = [],
+          // Flatten the grid to a single dimensional array:
+          occupiedGridpoints = [].concat.apply([],this._grid),
+          availableGridpoints = [];
+      
+      for( x = 0; x <= this._width; x += this._gridSize[0] ){
+         for( y = 0; y <= this._height; y += this._gridSize[1] ) {
+            gridpoint = [x,y];
+            if( !occupiedGridpoints.containsPoint( gridpoint ) ){
+               availableGridpoints.push( gridpoint );
+            }
+         }
+      }
+      
+      return availableGridpoints;
+   };
+   
+   /*!
     * Find Free Gridpoint
     * Finds the nearest gridpoint that is not occupied.
     */
    this.findFreeGridpoint = function( pos, deltaGrid ) {
-      var gridpoint = this.FindNearestGridPoint( pos );
+      var gridpoint = this.FindNearestGridPoint( pos ),
+          availableGridpoints = [],
+          gridpointsPerDistance = [],
+          i = 0,
+          distance = 0;
+      
       if( ! this.isValidGridpoint( gridpoint, deltaGrid ) ) {
-         alert('invalid grid point, now what?');
-         //TODO: Find 'available grid points near edge of shapes'
-         //TODO: Find 'closest available grid point'
+         availableGridpoints = this.getAvailableGridpoints();
+         // Brute force solution...
+         // Determine distance to grid points
+         gridpointsPerDistance = {};
+         for( i = 0; i < availableGridpoints.length; i += 1 ) {
+            distance = Math.abs(gridpoint[0] - availableGridpoints[i][0]) / this._gridSize[0] +
+                           Math.abs(gridpoint[1] - availableGridpoints[i][1]) / this._gridSize[1];
+            
+            if( !gridpointsPerDistance.hasOwnProperty(distance) ) {
+               gridpointsPerDistance[distance] = [];
+            }
+            gridpointsPerDistance[distance].push(availableGridpoints[i]);
+         }
+         
+         // The keys are automagically sorted, a for...in should start with distance 0 if available.
+         for( distance in gridpointsPerDistance ) {
+            if( gridpointsPerDistance.hasOwnProperty(distance) ) {
+               for( i = 0; i < gridpointsPerDistance[distance].length; i += 1 ) {
+                  if( this.isValidGridpoint( gridpointsPerDistance[distance][i], deltaGrid ) ) {
+                     return gridpointsPerDistance[distance][i];
+                  }
+               }
+            }
+         }
+         alert('No available gridpoint found...');
       }
       
       return gridpoint;
