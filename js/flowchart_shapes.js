@@ -343,7 +343,7 @@ var Action = function( name ) {
 var Choice = function( name ) {
    "use strict";
    
-   // Initialize Action as a subclass of FlowchartShape.
+   // Initialize Choice as a subclass of FlowchartShape.
    FlowchartShape.call(this,[8*FONT_SIZE,FONT_SIZE]);
    
    // Public API
@@ -389,7 +389,7 @@ var Choice = function( name ) {
 var Process = function( name ) {
    "use strict";
    
-   // Initialize Action as a subclass of FlowchartShape.
+   // Initialize Process as a subclass of FlowchartShape.
    FlowchartShape.call(this,[8*FONT_SIZE,FONT_SIZE]);
    
    // Public API
@@ -413,6 +413,56 @@ var Process = function( name ) {
       this.drawText( lines, context, this.posX + this._deltaX, this.posY + this._deltaY );
       context.strokeRect( this.posX + this._deltaX  - width * 0.5, this.posY + this._deltaY - height * 0.5, width, height );
       context.strokeRect( this.posX + this._deltaX - width * 0.5 - FONT_SIZE * 0.5, this.posY + this._deltaY - height * 0.5, width + FONT_SIZE, height );
+   };
+   
+   /*!
+    * Constructor
+    */
+   this.__init__ = function() {
+      this._name = name;
+   };
+   
+   // Call the constructor
+   this.__init__();
+};
+
+var Document = function( name ) {
+   "use strict";
+   
+   // Initialize Document as a subclass of FlowchartShape.
+   FlowchartShape.call(this,[8*FONT_SIZE,FONT_SIZE]);
+   
+   // Public API
+   /*!
+    * Draw
+    * TODO: Add comments
+    */
+   this.Draw = function( context ) {
+      var width = 8 * FONT_SIZE,
+          height = FONT_SIZE,
+          lines = [];
+      
+      context.lineWidth = 2;
+      context.fillStyle = "#fff";
+      context.strokeStyle = "#000";
+      
+      lines = this.splitText( this._name );
+      
+      height = (lines.length + 2) * FONT_SIZE;
+      
+      context.beginPath();
+      context.moveTo( this.posX + this._deltaX - width * 0.5, this.posY + this._deltaY + height * 0.4 );
+      context.lineTo( this.posX + this._deltaX - width * 0.5, this.posY + this._deltaY - height * 0.5 );
+      context.lineTo( this.posX + this._deltaX + width * 0.5, this.posY + this._deltaY - height * 0.5 );
+      context.lineTo( this.posX + this._deltaX + width * 0.5, this.posY + this._deltaY + height * 0.2 );
+      context.bezierCurveTo( this.posX + this._deltaX + width * 0.25, this.posY + this._deltaY + height * 0.2,
+                                this.posX + this._deltaX - width * 0.25, this.posY + this._deltaY + height * 0.8,
+                                this.posX + this._deltaX - width * 0.5, this.posY + this._deltaY + height * 0.4 );
+      context.fill();
+      context.stroke();
+      context.closePath();
+      
+      this.drawText( lines, context, this.posX + this._deltaX, this.posY + this._deltaY );
    };
    
    /*!
