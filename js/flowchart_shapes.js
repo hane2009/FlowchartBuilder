@@ -21,6 +21,7 @@ var FlowchartShape = function( rect ) {
     */
    this.Draw = function( context ) {
       context.lineWidth = 2;
+      context.fillStyle = "#000";
       context.strokeStyle = "#000";
       
       if( this._deltaX !== 0 || this._deltaY !== 0 ) {
@@ -134,8 +135,8 @@ var FlowchartShape = function( rect ) {
       
       minPos = this._parent.FindNearestGridPoint( [this.posX - this.width * 0.5, this.posY - this.height * 0.5 ] );
       maxPos = this._parent.FindNearestGridPoint( [this.posX + this.width * 0.5, this.posY + this.height * 0.5 ] );
-      for( x = minPos[0]; x <= maxPos[0]; x += gridSize[0] ) {
-         for( y = minPos[1]; y <= maxPos[1]; y += gridSize[1] ) {
+      for( x = maxPos[0]; x >= minPos[0]; x -= gridSize[0] ) {
+         for( y = maxPos[1]; y >= minPos[1]; y -= gridSize[1] ) {
             gridPoints.push( [x,y] );
          }
       }
