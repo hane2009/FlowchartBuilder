@@ -20,6 +20,7 @@
             // Add four test shapes to the canvas.
             canvas.AddShape( [150,100], new Action( 'Test Action' ));
             canvas.AddShape( [450,100], new Choice( 'Test OK?' ));
+            canvas.AddShape( [750,100], new Process( 'Test Process' ));
             
             // The first draw() has to be called manually.
             canvas.Draw();

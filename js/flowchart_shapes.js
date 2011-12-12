@@ -385,3 +385,43 @@ var Choice = function( name ) {
    // Call the constructor
    this.__init__();
 };
+
+var Process = function( name ) {
+   "use strict";
+   
+   // Initialize Action as a subclass of FlowchartShape.
+   FlowchartShape.call(this,[8*FONT_SIZE,FONT_SIZE]);
+   
+   // Public API
+   /*!
+    * Draw
+    * TODO: Add comments
+    */
+   this.Draw = function( context ) {
+      var width = 8 * FONT_SIZE,
+          height = FONT_SIZE,
+          lines = [];
+      
+      context.lineWidth = 2;
+      context.fillStyle = "#000";
+      context.strokeStyle = "#000";
+      
+      lines = this.splitText( this._name );
+      
+      height = (lines.length + 1) * FONT_SIZE;
+      context.clearRect( this.posX + this._deltaX - width * 0.5 - FONT_SIZE * 0.5, this.posY + this._deltaY - height * 0.5, width + FONT_SIZE, height );
+      this.drawText( lines, context, this.posX + this._deltaX, this.posY + this._deltaY );
+      context.strokeRect( this.posX + this._deltaX  - width * 0.5, this.posY + this._deltaY - height * 0.5, width, height );
+      context.strokeRect( this.posX + this._deltaX - width * 0.5 - FONT_SIZE * 0.5, this.posY + this._deltaY - height * 0.5, width + FONT_SIZE, height );
+   };
+   
+   /*!
+    * Constructor
+    */
+   this.__init__ = function() {
+      this._name = name;
+   };
+   
+   // Call the constructor
+   this.__init__();
+};
