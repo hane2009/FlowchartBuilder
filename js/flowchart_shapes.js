@@ -352,27 +352,54 @@ var Choice = function( name ) {
     * TODO: Add comments
     */
    this.Draw = function( context ) {
-      var width = 8 * FONT_SIZE,
-          height = FONT_SIZE,
-          lines = [];
-      
       context.lineWidth = 2;
       context.fillStyle = "#fff";
       context.strokeStyle = "#000";
       
-      lines = this.splitText( this._name );
-      
-      height = (lines.length + 1) * FONT_SIZE;
       context.beginPath();
-      context.moveTo( this.posX + this._deltaX, this.posY + this._deltaY - height * 0.5 );
-      context.lineTo( this.posX + this._deltaX + width * 0.5, this.posY + this._deltaY );
-      context.lineTo( this.posX + this._deltaX, this.posY + this._deltaY + height * 0.5 );
-      context.lineTo( this.posX + this._deltaX - width * 0.5, this.posY + this._deltaY );
-      context.lineTo( this.posX + this._deltaX, this.posY + this._deltaY - height * 0.5 );
+      context.moveTo( this.posX + this._deltaX, this.posY + this._deltaY - this.height * 0.5 );
+      context.lineTo( this.posX + this._deltaX + this.width * 0.5, this.posY + this._deltaY );
+      context.lineTo( this.posX + this._deltaX, this.posY + this._deltaY + this.height * 0.5 );
+      context.lineTo( this.posX + this._deltaX - this.width * 0.5, this.posY + this._deltaY );
+      context.lineTo( this.posX + this._deltaX, this.posY + this._deltaY - this.height * 0.5 );
       context.fill();
       context.stroke();
       context.closePath();
-      this.drawText( lines, context, this.posX + this._deltaX, this.posY + this._deltaY );
+      this.drawText( this._lines, context, this.posX + this._deltaX, this.posY + this._deltaY );
+   };
+   
+   /*!
+    * In Boundaries?
+    * Tests if a point is inside this shape's boundaries.
+    */
+   this.InBoundaries = function( posX, posY ) {
+      var A = [],
+          B = [],
+          C = [],
+          x = [];
+      
+      // Inside rectangle of boundaries...
+      if( posX >= this.posX - (0.5 * this.width) &&
+          posX <= this.posX + (0.5 * this.width) &&
+          posY >= this.posY - (0.5 * this.height) &&
+          posY <= this.posY + (0.5 * this.height) ) {
+         // ... and inside actual boundaries.
+         // Determine if point x (posX,posY) is within the absolute triangle
+         //
+         // C
+         // |\
+         // | \
+         // |  \
+         // | x \
+         // |    \
+         // A-----B
+         A = [this.posX, this.posY];
+         B = [this.posX + this.width * 0.5, this.posY];
+         C = [this.posX, this.posY + this.height * 0.5];
+         x = [Math.abs( this.posX - posX ), Math.abs( this.posY - posY )];
+         return x[1] <= Math.ceil(((C[1] - A[1]) / (B[0] - A[0])) * (B[0] - A[0] - x[0]));
+      }
+      return false;
    };
    
    /*!
@@ -380,6 +407,9 @@ var Choice = function( name ) {
     */
    this.__init__ = function() {
       this._name = name;
+      this._lines = this.splitText( name );
+      this.width = 9 * FONT_SIZE;
+      this.height = (this._lines.length + 1) * FONT_SIZE;
    };
    
    // Call the constructor
