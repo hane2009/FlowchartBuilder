@@ -516,31 +516,23 @@ var Document = function( name ) {
     * TODO: Add comments
     */
    this.Draw = function( context ) {
-      var width = 8 * FONT_SIZE,
-          height = FONT_SIZE,
-          lines = [];
-      
       context.lineWidth = 2;
       context.fillStyle = "#fff";
       context.strokeStyle = "#000";
       
-      lines = this.splitText( this._name );
-      
-      height = (lines.length + 2) * FONT_SIZE;
-      
       context.beginPath();
-      context.moveTo( this.posX + this._deltaX - width * 0.5, this.posY + this._deltaY + height * 0.4 );
-      context.lineTo( this.posX + this._deltaX - width * 0.5, this.posY + this._deltaY - height * 0.5 );
-      context.lineTo( this.posX + this._deltaX + width * 0.5, this.posY + this._deltaY - height * 0.5 );
-      context.lineTo( this.posX + this._deltaX + width * 0.5, this.posY + this._deltaY + height * 0.2 );
-      context.bezierCurveTo( this.posX + this._deltaX + width * 0.25, this.posY + this._deltaY + height * 0.2,
-                                this.posX + this._deltaX - width * 0.25, this.posY + this._deltaY + height * 0.8,
-                                this.posX + this._deltaX - width * 0.5, this.posY + this._deltaY + height * 0.4 );
+      context.moveTo( this.posX + this._deltaX - this.width * 0.5, this.posY + this._deltaY + this.height * 0.4 );
+      context.lineTo( this.posX + this._deltaX - this.width * 0.5, this.posY + this._deltaY - this.height * 0.5 );
+      context.lineTo( this.posX + this._deltaX + this.width * 0.5, this.posY + this._deltaY - this.height * 0.5 );
+      context.lineTo( this.posX + this._deltaX + this.width * 0.5, this.posY + this._deltaY + this.height * 0.2 );
+      context.bezierCurveTo( this.posX + this._deltaX + this.width * 0.25, this.posY + this._deltaY + this.height * 0.2,
+                             this.posX + this._deltaX - this.width * 0.25, this.posY + this._deltaY + this.height * 0.8,
+                             this.posX + this._deltaX - this.width * 0.5, this.posY + this._deltaY + this.height * 0.4 );
       context.fill();
       context.stroke();
       context.closePath();
       
-      this.drawText( lines, context, this.posX + this._deltaX, this.posY + this._deltaY );
+      this.drawText( this._lines, context, this.posX + this._deltaX, this.posY + this._deltaY );
    };
    
    /*!
@@ -548,6 +540,9 @@ var Document = function( name ) {
     */
    this.__init__ = function() {
       this._name = name;
+      this._lines = this.splitText( name );
+      this.width = 9 * FONT_SIZE;
+      this.height = (this._lines.length + 1) * FONT_SIZE;
    };
    
    // Call the constructor
