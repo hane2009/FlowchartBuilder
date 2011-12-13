@@ -1,5 +1,5 @@
 /*!
- * FlowchartBuilder - Shape
+ * FlowchartBuilder - Shapes
  *
  * Copyright 2011, IJsbrand Slob
  * All rights reserved
@@ -301,6 +301,9 @@ var FlowchartShape = function( rect ) {
    this.__init__();
 };
 
+/*!
+ * TODO: Add comments
+ */
 var Action = function( name ) {
    "use strict";
    
@@ -340,6 +343,9 @@ var Action = function( name ) {
    this.__init__();
 };
 
+/*!
+ * TODO: Add comments
+ */
 var Choice = function( name ) {
    "use strict";
    
@@ -438,6 +444,9 @@ var Choice = function( name ) {
    };
    
    // Private API
+   /*!
+    * TODO: Add comments
+    */
    this.getDistanceToBoundary = function( posX, posY ) {
       var A = [],
           B = [],
@@ -462,6 +471,9 @@ var Choice = function( name ) {
    this.__init__();
 };
 
+/*!
+ * TODO: Add comments
+ */
 var Process = function( name ) {
    "use strict";
    
@@ -504,6 +516,9 @@ var Process = function( name ) {
    this.__init__();
 };
 
+/*!
+ * TODO: Add comments
+ */
 var Document = function( name ) {
    "use strict";
    
