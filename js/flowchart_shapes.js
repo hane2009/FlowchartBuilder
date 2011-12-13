@@ -403,6 +403,31 @@ var Choice = function( name ) {
    };
    
    /*!
+    * Get Occupied Gridpoints
+    */
+   this.GetOccupiedGridpoints = function( gridSize ) {
+      var x = 0,
+          y = 0,
+          minPos = 0,
+          maxPos = 0,
+          gridPoints = [];
+      
+      minPos = this._parent.FindNearestGridPoint( [this.posX - this.width * 0.5, this.posY - this.height * 0.5 ] );
+      maxPos = this._parent.FindNearestGridPoint( [this.posX + this.width * 0.5, this.posY + this.height * 0.5 ] );
+      for( x = maxPos[0]; x >= minPos[0]; x -= gridSize[0] ) {
+         for( y = maxPos[1]; y >= minPos[1]; y -= gridSize[1] ) {
+            if( this.InBoundaries( x, y ) ) {
+               gridPoints.push( [x,y] );
+            }
+            else if( this.getDistanceToBoundary(x,y) < (gridSize[0] + gridSize[1]) / 4) {
+               gridPoints.push( [x,y] );
+            }
+         }
+      }
+      return gridPoints;
+   };
+   
+   /*!
     * Constructor
     */
    this.__init__ = function() {
@@ -412,6 +437,27 @@ var Choice = function( name ) {
       this.height = (this._lines.length + 1) * FONT_SIZE;
    };
    
+   // Private API
+   this.getDistanceToBoundary = function( posX, posY ) {
+      var A = [],
+          B = [],
+          C = [],
+          x = [];
+      // Determine Y position of boundary at posX
+      //
+      // C
+      // |\
+      // | \
+      // |  \
+      // | x \
+      // |    \
+      // A-----B
+      A = [this.posX, this.posY];
+      B = [this.posX + this.width * 0.5, this.posY];
+      C = [this.posX, this.posY + this.height * 0.5];
+      x = [Math.abs( this.posX - posX ), Math.abs( this.posY - posY )];
+      return Math.abs(x[1] - Math.ceil(((C[1] - A[1]) / (B[0] - A[0])) * (B[0] - A[0] - x[0])));
+   };
    // Call the constructor
    this.__init__();
 };
