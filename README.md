@@ -7,10 +7,8 @@ State of source code
 It is currently in a state where you can drag & drop shapes on a grid, not much but something.
 The code needs some cleaning up so I can add several flowchart shapes.
 
-Next 5 items of TODO list
+Next items of TODO list
 -------------------------
- * OnMouseOver/OnMouseOut events of Document and Choice should become more accurate to the actual shapes
- * Choice and Document shapes should have their own algorithm to determine what gridpoints they occupy
  * Allow new shapes to be placed from some kind of 'toolbar'
  * Draw lines / arrows between shapes
  * Determine 'snap points' on shapes for lines/arrows
